@@ -1,7 +1,7 @@
 # ThreatForge Encryption and Decryption Tool
 
 ## Overview
-This Python module, developed for ThreatForge, provides functionalities for encryption and decryption of text. It includes key generation, key interpretation, encryption, and decryption processes.
+This Python module, developed by ThreatForge, provides functionalities for encryption and decryption of text. It includes key generation, key interpretation, encryption, and decryption processes.
 
 ## Features
 - **Key Generation:**
@@ -35,26 +35,25 @@ This Python module, developed for ThreatForge, provides functionalities for encr
 ## Usage
 ```python
 # Example Usage
+import Cripter
 
 # Generate keys and save them to a file
-keys = keyGenerator("output_keys.txt")
+keys = Cripter.keyGenerator("output_keys.txt")
 
 # Encrypt a message
 quote = "Hello, ThreatForge!"
-encrypted_quote = encripter(quote, "output_encrypted.txt", keys)
+encrypted_quote = Cripter.encripter(quote, "output_encrypted.txt", keys)
 
 # Decrypt the message
-decrypted_quote = decripter(encrypted_quote, "output_keys.txt")
+decrypted_quote = Cripter.decripter(encrypted_quote, "output_keys.txt")
 print(decrypted_quote)
 ```
 
 
-## Note
-- The module uses a combination of uppercase and lowercase letters, digits, punctuation, and accented characters for encryption.
 
 ## Contributors
 
-- [Guilherme Soares](github.com/guimbreon)
+- [Guilherme Soares](https://github.com/Guimbreon)
 
 ## License
 This ThreatForge Encryption and Decryption Tool is licensed under the MIT. See the [LICENSE](LICENSE) file for details.
