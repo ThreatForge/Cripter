@@ -1,112 +1,141 @@
-"""
-This module is used when there's a need to encript or decript some text.
-"""
 import random
 import string
 
-
-def keyGenerator(outputFile,quote = False):
+def generateEncryptionKeys(outputFilePath, textToEncrypt=None):
     """
-    Generates encription-keys for a given quote or 
-    Generates a keyDictionary with a key for every simbol.
+    Generates encryption keys for a given text or creates a key dictionary with a key for every symbol.
 
-    Requires: outputFile str that represents the path to the output file,
-    quote str represents what you want to translate -> it's not required if you want to create a "keyDictionary"(a key for every simbol possible)
-    Ensures: Keys for the wanted simbols
-    """
-    #Variable incializations
-    everySimbol = string.ascii_letters + string.digits + string.punctuation + " áéíóúâêîôûàèìòùãõäëïöüÁÉÍÓÚÂÊÎÔÛÀÈÌÒÙÃÕÄËÏÖÜ"
-    differentSimbols = []
-    changedSimbols = {}
-    #separate each letter from the "quote"
-    if quote == False: #if they don't give the function a quote, it'll generate a dictionary.
-        quote = everySimbol
-        for simbol in quote:
-            if simbol in differentSimbols:
-                continue
-            else:
-                differentSimbols.append(simbol)
-    else:
-        for simbol in quote:
-            if simbol in differentSimbols:
-                continue
-            else:
-                differentSimbols.append(simbol)
-    for simbol in differentSimbols:
-        i = 0
-        while i == 0: # if by random, it creates 2 equal values, it'll create another so that we don't have duplicated values
-            new_simbol = ""
-            for item in random.choices(everySimbol,k = 5):
-                new_simbol += item
-            if new_simbol not in changedSimbols.values():
-                i = 13
-                changedSimbols[simbol] = new_simbol
+    Requires: 
+        - outputFilePath (str): Path to the output file.
+        - textToEncrypt (str, optional): Text to be translated. If not provided, a key dictionary will be generated.
     
-    with open(outputFile,'w') as file:
-        for key in changedSimbols:
+    Ensures: 
+        Keys for the desired symbols.
+    """
+    # Variable initializations
+    allSymbols = string.ascii_letters + string.digits + string.punctuation + " áéíóúâêîôûàèìòùãõäëïöüÁÉÍÓÚÂÊÎÔÛÀÈÌÒÙÃÕÄËÏÖÜ"
+    uniqueSymbols = []
+    symbolMapping = {}
+
+    # Separate each letter from the text
+    if textToEncrypt is None:
+        textToEncrypt = allSymbols
+        for symbol in textToEncrypt:
+            if symbol in uniqueSymbols:
+                continue
+            else:
+                uniqueSymbols.append(symbol)
+    else:
+        for symbol in textToEncrypt:
+            if symbol in uniqueSymbols:
+                continue
+            else:
+                uniqueSymbols.append(symbol)
+
+    # Generate random keys for each unique symbol
+    for symbol in uniqueSymbols:
+        i = 0
+        while i == 0:
+            newSymbol = "".join(random.choices(allSymbols, k=5))
+            if newSymbol not in symbolMapping.values():
+                i = 13
+                symbolMapping[symbol] = newSymbol
+
+    # Write the generated keys to the output file
+    with open(outputFilePath, 'w') as file:
+        for key, value in symbolMapping.items():
             file.write(f"{key} :\n")
-            file.write(f"{changedSimbols[key]}\n")
-    return changedSimbols
+            file.write(f"{value}\n")
+
+    return symbolMapping
 
 def readKeys(filePath):
     """
-    Interprets the keys in a given file.
+    Reads and interprets keys from a given file.
 
-    Requires: filePath str representing the path to where you have pre-saved keys.
-    Ensures: dictionary with simbols as the key and "keys" has the value
-    """
-    #Variable incializations
-    keyDict = {}
-    i = 0
-    simbol = ""
-    #Code
-    with open(filePath,"r") as file:
-        for item in file:
-            if i%2 == 0:
-                simbol = item.replace(" :\n","")
-            else:
-                keyDict[simbol] = item.replace("\n","")
-            i += 1
-    return keyDict
-
-def encripter(quote, outputFile,keys = False):
-    """
-    Encripts given messages
+    Requires: 
+        - filePath (str): Path to the file containing pre-saved keys.
     
-    Requires: quote str that represents the quote you want to encript,
-    outputFile str representing the path to where you want to save your keys,
-    keys(optional) str representing the path where you have pre-saved keys.
-    Ensures: encripted message.
+    Ensures: 
+        Dictionary with symbols as keys and corresponding keys as values.
     """
-    #Intializing variables
-    new_quote = ""
-    #code
-    if keys == False:
-        keys = keyGenerator(outputFile)
+    keyDictionary = {}
+    count = 0
+    symbol = ""
+
+    with open(filePath, "r") as file:
+        for line in file:
+            if count % 2 == 0:
+                symbol = line.replace(" :\n", "")
+            else:
+                keyDictionary[symbol] = line.replace("\n", "")
+            count += 1
+
+    return keyDictionary
+
+def encrypt(text, outputFilePath, keys=None):
+    """
+    Encrypts given messages.
+
+    Requires: 
+        - text (str): The text to be encrypted.
+        - outputFilePath (str): Path to save the generated keys.
+        - keys (str, optional): Path to a file containing pre-saved keys.
+    
+    Ensures: 
+        Encrypted message.
+    """
+    newText1 = ""
+    newText2 = ""
+    index = 0
+
+    # Generate or read keys
+    if keys is None:
+        keys = generateEncryptionKeys(outputFilePath)
     else:
         keys = readKeys(keys)
-    for item in quote:
-        new_quote += keys[item]
-    return new_quote
 
-def decripter (quote, keysPath):
-    """
-    Decript a given message
+    # Encrypt the message
+    for char in text:
+        newText1 += keys[char][::-1]
 
-    Requires: quote str that represents an encripted quote,
-    keysPath str that represent the path to the file containing the keys
-    Ensures: decripted message.
+    # Rearrange the encrypted message for added security
+    for symbol in newText1:
+        if index % 2 == 0:
+            newText2 += symbol
+        else:
+            newText2 += symbol
+        index += 1
+
+    return newText2
+
+def decrypt(text, keysPath):
     """
-    #Initializing variables
-    quoteBreak = []
-    new_quote = ""
-    #Code
+    Decrypts a given message.
+
+    Requires: 
+        - text (str): The encrypted text.
+        - keysPath (str): Path to the file containing the keys.
+    
+    Ensures: 
+        Decrypted message.
+    """
+    # Initializing variables
+    textBreakdown = []
+    decryptedText = ""
+
+    # Read keys from the specified file
     keys = readKeys(keysPath)
-    while len(quote) != 0:
-        quoteBreak.append(quote[:5])
-        quote = quote[5:]
-    for item in quoteBreak:
-        for k,v in keys.items():
-            if v == item:
-                new_quote += k
-    return new_quote
+
+    # Break down the encrypted text into segments and reverse them
+    while len(text) != 0:
+        textBreakdown.append(text[:5][::-1])
+        text = text[5:]
+
+    # Reconstruct the decrypted text using the keys
+    for segment in textBreakdown:
+        for key, value in keys.items():
+            if value == segment:
+                decryptedText += key
+
+    return decryptedText
